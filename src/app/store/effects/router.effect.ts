@@ -1,18 +1,22 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 
 import { Effect, Actions } from '@ngrx/effects';
 import * as RouterActions from '../actions/router.action';
 
-import { tap, map } from 'rxjs/operators';
+import { tap, map, filter } from 'rxjs/operators';
+import { ROUTER_NAVIGATION } from '@ngrx/router-store';
+import { GuidService } from '../../guid.service';
 
 @Injectable()
 export class RouterEffects {
   constructor(
     private actions$: Actions,
     private router: Router,
-    private location: Location
+    private location: Location,
+    private route: ActivatedRoute,
+    private guid: GuidService
   ) {}
 
   @Effect({ dispatch: false })
@@ -32,4 +36,40 @@ export class RouterEffects {
   navigateForward$ = this.actions$
     .ofType(RouterActions.FORWARD)
     .pipe(tap(() => this.location.forward()));
+
+  @Effect()
+  addGuid$ = this.actions$.ofType(ROUTER_NAVIGATION).pipe(
+    filter((x: any) => x.payload),
+    filter(x => x.payload.routerState),
+    filter(x => x.payload.routerState.queryParams),
+    filter(x => x.payload.routerState.queryParams.guid),
+    map(x => new RouterActions.Guid(x.payload.routerState.queryParams.guid))
+  );
+
+  @Effect()
+  resolveGuid$ = this.actions$.ofType(RouterActions.GUID).pipe(
+    tap((x: RouterActions.Guid) =>
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { gu: x.payload },
+      })
+    ),
+    map((x: RouterActions.Guid) => {
+      return new RouterActions.GuidWithState(
+        this.guid.loadStateByGuid(x.payload)
+      );
+    })
+  );
+  @Effect({ dispatch: false })
+  saveState$ = this.actions$.ofType(RouterActions.STATE).pipe(
+    map((x: RouterActions.GuidHasState) => {
+      return this.guid.saveState(x.payload);
+    }),
+    tap((x: string) => {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { gu: x },
+      });
+    })
+  );
 }

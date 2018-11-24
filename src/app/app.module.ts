@@ -28,6 +28,8 @@ export const metaReducers: MetaReducer<any>[] = !environment.production
 
 // bootstrap
 import { AppComponent } from './containers/app/app.component';
+import { GuidService } from './guid.service';
+import { PersistanceService } from './persistance.service';
 
 // routes
 export const ROUTES: Routes = [
@@ -48,7 +50,11 @@ export const ROUTES: Routes = [
     StoreRouterConnectingModule,
     environment.development ? StoreDevtoolsModule.instrument() : [],
   ],
-  providers: [{ provide: RouterStateSerializer, useClass: CustomSerializer }],
+  providers: [
+    { provide: RouterStateSerializer, useClass: CustomSerializer },
+    GuidService,
+    PersistanceService,
+  ],
   declarations: [AppComponent],
   bootstrap: [AppComponent],
 })

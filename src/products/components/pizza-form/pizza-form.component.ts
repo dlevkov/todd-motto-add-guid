@@ -27,11 +27,11 @@ import { Topping } from '../../models/topping.model';
   template: `
     <div class="pizza-form">
       <form [formGroup]="form">
-      
+
         <label>
           <h4>Pizza name</h4>
-          <input 
-            type="text" 
+          <input
+            type="text"
             formControlName="name"
             placeholder="e.g. Pepperoni"
             class="pizza-form__input"
@@ -42,7 +42,7 @@ import { Topping } from '../../models/topping.model';
             <p>Pizza must have a name</p>
           </div>
         </label>
-      
+
         <ng-content></ng-content>
 
         <label>
@@ -73,7 +73,9 @@ import { Topping } from '../../models/topping.model';
             (click)="updatePizza(form)">
             Save changes
           </button>
-
+          <a class="btn btn__ok" [routerLink]="['.']" [queryParams]="{guid: 'b0df4fa0-ef05-11e8-821c-fb6cd0d1f4f3'}">
+          New Guid
+        </a>
           <button
             type="button"
             class="btn btn__warning"
